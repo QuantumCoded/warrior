@@ -38,10 +38,10 @@ createServer(async (req, res) => {
             await Promise.allSettled(items.map(async item => {
                 const { title, link } = item;
 
-                const dom = await JSDOM.fromURL(link, {userAgent: 'Mozilla/5.0 (X11; U; Linux i686; en-US) AppleWebKit/534.3 (KHTML, like Gecko) Chrome/6.0.472.63 Safari/534.3'}); /*.catch(error => {
+                const dom = await JSDOM.fromURL(link, {userAgent: 'Mozilla/5.0 (X11; U; Linux i686; en-US) AppleWebKit/534.3 (KHTML, like Gecko) Chrome/6.0.472.63 Safari/534.3'}).catch(error => {
                     console.log(JSON.stringify(error, null, 4));
                     if (!res.writableEnded) res.writeHead(500, 'Internal Server Error').end(JSON.stringify(error));
-                });*/
+                });
 
                 if (dom) {
                     const words: NodeListOf<HTMLSpanElement> = dom.window.document.querySelectorAll('.SetPageTerm-wordText > .TermText');
