@@ -39,6 +39,7 @@ createServer(async (req, res) => {
                 const { title, link } = item;
 
                 const dom = await JSDOM.fromURL(link).catch(error => {
+                    console.log(JSON.stringify(error, null, 4));
                     res.writeHead(500, 'Internal Server Error').end(JSON.stringify(error));
                 });
 
