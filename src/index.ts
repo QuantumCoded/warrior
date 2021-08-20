@@ -57,4 +57,4 @@ createServer(async (req, res) => {
             res.writeHead(200, 'OK', { 'content-type': 'text/json' }).end(JSON.stringify(results));
         }
     });
-}).listen(process.env.PORT);
+}).listen(process.env.PORT || 8080);
