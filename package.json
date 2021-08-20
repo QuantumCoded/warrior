@@ -1,0 +1,21 @@
+{
+  "name": "warrior",
+  "version": "1.0.0",
+  "description": "Warrior search, a quizzlet term aggrigator",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node dist/index.js",
+    "postinstall": "tsc"
+  },
+  "author": "QuantumCoded",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jsdom": "^16.2.13",
+    "@types/node": "^16.7.0"
+  },
+  "dependencies": {
+    "googleapis": "^84.0.0",
+    "jsdom": "^17.0.0"
+  }
+}
