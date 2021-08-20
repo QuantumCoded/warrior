@@ -31,7 +31,7 @@ createServer(async (req, res) => {
 
     google_search(search, async (error, result) => {
         if (error) {
-            res.writeHead(500, 'Internal Server Error').end(JSON.stringify(error));
+            if (!res.writableEnded) res.writeHead(500, 'Internal Server Error').end(JSON.stringify(error));
         } else {
             const items: { title: string, link: string }[] = result?.data?.items;
 
@@ -40,7 +40,7 @@ createServer(async (req, res) => {
 
                 const dom = await JSDOM.fromURL(link).catch(error => {
                     console.log(JSON.stringify(error, null, 4));
-                    res.writeHead(500, 'Internal Server Error').end(JSON.stringify(error));
+                    if (!res.writableEnded) res.writeHead(500, 'Internal Server Error').end(JSON.stringify(error));
                 });
 
                 if (dom) {
@@ -55,7 +55,7 @@ createServer(async (req, res) => {
                 }
             }));
 
-            res.writeHead(200, 'OK', { 'content-type': 'text/json' }).end(JSON.stringify(results));
+            if (!res.writableEnded) res.writeHead(200, 'OK', { 'content-type': 'text/json' }).end(JSON.stringify(results));
         }
     });
 }).listen(process.env.PORT || 8080);
