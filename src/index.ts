@@ -31,7 +31,7 @@ createServer(async (req, res) => {
 
     google_search(search, async (error, result) => {
         if (error) {
-            res.writeHead(500, 'Internal Server Error').end(error);
+            res.writeHead(500, 'Internal Server Error').end(JSON.stringify(error));
         } else {
             const items: { title: string, link: string }[] = result?.data?.items;
 
@@ -39,7 +39,7 @@ createServer(async (req, res) => {
                 const { title, link } = item;
 
                 const dom = await JSDOM.fromURL(link).catch(error => {
-                    res.writeHead(500, 'Internal Server Error', error);
+                    res.writeHead(500, 'Internal Server Error').end(JSON.stringify(error));
                 });
 
                 if (dom) {
