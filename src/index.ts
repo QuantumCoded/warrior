@@ -1,6 +1,7 @@
 import { google } from 'googleapis';
 import { createServer } from 'http';
 import { JSDOM } from 'jsdom';
+import * as superagent from 'superagent';
 import * as url from 'url'
 
 const search = google.customsearch('v1');
@@ -38,10 +39,27 @@ createServer(async (req, res) => {
             await Promise.allSettled(items.map(async item => {
                 const { title, link } = item;
 
-                const dom = await JSDOM.fromURL(link, {userAgent: 'Mozilla/5.0 (X11; U; Linux i686; en-US) AppleWebKit/534.3 (KHTML, like Gecko) Chrome/6.0.472.63 Safari/534.3'}).catch(error => {
+                const html = await new Promise<string>((resolve, reject) => {
+                    superagent
+                        .get(link)
+                        .set('Accept-Language', 'en-US,en;q=0.9,*;q=0.5')
+                        .set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36')
+                        .end((err, res) => {
+                            if (err) {
+                                console.log(err)
+                                reject(err)
+                            } else {
+                                resolve(res.text)
+                            }
+                        });
+                });
+
+                const dom = new JSDOM(html);
+                
+                /* await JSDOM.fromURL(link, {userAgent: 'Mozilla/5.0 (X11; U; Linux i686; en-US) AppleWebKit/534.3 (KHTML, like Gecko) Chrome/6.0.472.63 Safari/534.3'}).catch(error => {
                     console.log(JSON.stringify(error, null, 4));
                     if (!res.writableEnded) res.writeHead(500, 'Internal Server Error').end(JSON.stringify(error));
-                });
+                }); */
 
                 if (dom) {
                     const words: NodeListOf<HTMLSpanElement> = dom.window.document.querySelectorAll('.SetPageTerm-wordText > .TermText');
