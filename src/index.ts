@@ -45,6 +45,7 @@ createServer(async (req, res) => {
             await Promise.allSettled(items.map(async item => {
                 const { title, link } = item;
 
+                console.log("===================== BEFORE ERROR =====================");
                 const html = await new Promise<string>((resolve, reject) => {
                     superagent
                         .get(link)
@@ -52,13 +53,14 @@ createServer(async (req, res) => {
                         .set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36')
                         .end((err, res) => {
                             if (err) {
-                                console.log(err)
-                                reject(err)
+                                console.log(err);
+                                reject(err);
                             } else {
-                                resolve(res.text)
+                                resolve(res.text);
                             }
                         });
                 });
+                console.log("===================== AFTER ERROR =====================")
 
                 const dom = new JSDOM(html);
 
