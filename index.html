@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            * {
+                color: white;
+            }
+            input {
+                color: black!important;
+            }
+            body {
+                padding: 0px;
+                margin: 0px;
+                background-color: #404045;
+            }
+            .terms-grid {
+                display: grid;
+                gap: 50px;
+                padding: 20px;
+            }
+            .term {
+                grid-column-start: 1;
+                grid-column-end: 2;
+            }
+            .definition {
+                grid-column-start: 2;
+                grid-column-end: 3;
+            }
+            hr {
+                grid-column-start: 1;
+                grid-column-end: 3;
+                width: 100%;
+            }
+            #top-bar {
+                top: 0px;
+                position: sticky;
+                padding: 10px;
+                background-color: #353540;
+            }
+        </style>
+        <template id="term-template">
+            <div id="term" class="term"></div>
+            <div id="definition" class="definition"></div>
+            <hr>
+        </template>
+        <script>
+            function addTerm(term, definition) {
+                let template = document.getElementById('term-template').content.cloneNode(true);
+                console.log(template);
+                
+                template.getElementById('term').innerHTML = term;
+                template.getElementById('definition').innerHTML = definition;
+                
+                document.getElementById('terms').appendChild(template);
+            }
+
+            function XHR(url,cb,headers,method,post,contenttype) {
+                var requestTimeout,xhr;
+                try{ xhr = new XMLHttpRequest(); } catch(e) {
+                    try{ xhr = new ActiveXObject("Msxml2.XMLHTTP"); } catch (e) {
+                        if (console) console.log("XMLHttpRequest not supported");
+                        return null;
+                    }
+                }
+
+                requestTimeout = setTimeout(function() {xhr.abort(); cb(xhr); }, 30000);
+
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState != 4) return;
+                    clearTimeout(requestTimeout);
+                    cb(xhr);
+                };
+
+                xhr.open(method?method.toUpperCase():"GET", url, true);
+
+                for (let header in headers) xhr.setRequestHeader(header, headers[header]);
+
+                if(!post) xhr.send();
+                else {
+                    xhr.setRequestHeader('Content-type', contenttype?contenttype:'application/x-www-form-urlencoded');
+                    xhr.send(post);
+                }
+            }
+
+            function search() {
+                let search = document.getElementById('search');
+
+                search.isContentEditable = false;
+
+                XHR(`${document.location.href}/?search=${search.value}`, xhr => {
+                    console.log(xhr.responseText);
+                    
+                    let response = JSON.parse(xhr.responseText);
+
+                    for (page of response) {
+                        for (term of page.terms) {
+                            addTerm(term.word, term.definition);
+                        }
+                    }
+
+                    search.isContentEditable = true;
+                });
+            }
+        </script>
+    </head>
+    <body>
+        <div id="top-bar">
+            Search:
+            <input id="search" type="text"/>
+            <input id="search-button" type="button" onclick="search()" value="Search" />
+            Filter: <input id="filter" type="text" />
+        </div>
+
+        <div id="terms" class="terms-grid" />
+        
+        <script>
+            document.getElementById('search').addEventListener('keyup', event => {
+                if (event.keyCode === 13) {
+                    event.preventDefault();
+                    document.getElementById('search-button').click();
+                }
+            });
+        </script>
+
+    </body>
+</html>

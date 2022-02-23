@@ -3,6 +3,7 @@ import { createServer } from 'http';
 import { JSDOM } from 'jsdom';
 import * as superagent from 'superagent';
 import * as url from 'url'
+import { createReadStream } from 'fs';
 
 const search = google.customsearch('v1');
 
@@ -23,10 +24,15 @@ createServer(async (req, res) => {
         return;
     }
 
+    if (req.url == '/index.html' || req.url == '/') {
+        createReadStream('index.html').pipe(res.writeHead(200, 'OK'));
+        return;
+    }
+
     const search = url.parse(req.url, true).query.search;
 
     if (typeof search !== 'string') {
-        res.writeHead(400, 'Bad Request').end();
+        res.writeHead(400, 'Bad Request').end("400 Bad Request");
         return;
     }
 
@@ -55,20 +61,12 @@ createServer(async (req, res) => {
                 });
 
                 const dom = new JSDOM(html);
-                
-                /* await JSDOM.fromURL(link, {userAgent: 'Mozilla/5.0 (X11; U; Linux i686; en-US) AppleWebKit/534.3 (KHTML, like Gecko) Chrome/6.0.472.63 Safari/534.3'}).catch(error => {
-                    console.log(JSON.stringify(error, null, 4));
-                    if (!res.writableEnded) res.writeHead(500, 'Internal Server Error').end(JSON.stringify(error));
-                }); */
 
                 if (dom) {
                     const words: NodeListOf<HTMLSpanElement> = dom.window.document.querySelectorAll('.SetPageTerm-wordText > .TermText');
                     const definitions: NodeListOf<HTMLSpanElement> = dom.window.document.querySelectorAll('.SetPageTerm-definitionText > .TermText');
 
                     const map = Array.from(words).map((word, i) => ({ word: word.textContent, definition: definitions[i].textContent }));
-
-                    console.log(link, map);
-
                     results.push({ title, link, terms: map });
                 }
             }));
@@ -76,4 +74,4 @@ createServer(async (req, res) => {
             if (!res.writableEnded) res.writeHead(200, 'OK', { 'content-type': 'text/json' }).end(JSON.stringify(results));
         }
     });
-}).listen(process.env.PORT || 8080);
+}).listen(process.env.PORT || 8080, () => { console.log("ready") });
